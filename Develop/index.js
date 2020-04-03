@@ -17,7 +17,7 @@ function promptUserName() {
     ]);
 };
 
-function promptUserInfo() {
+function promptUserInfo(user) {
     return inquirer.prompt([
         {
             type: "input",
@@ -47,34 +47,39 @@ function promptUserInfo() {
     ]);
 };
 
-function generateMarkdown({title, description, installation, usage, contributors}, login, avatar) {
+function generateMarkdown(user, email, avatar, login) {
     return `
-    # ${title}
-  
-    ## Description
-  
-    ${description}
-  
-    ## Table of Contents
-  
-    *[Installation](#installation)
-    *[Usage](#usage)
-    *[Contributing](#contributing)
-  
-    ## Installation
-  
-    ${installation}
-  
-    ## Usage
-  
-    ${usage}
-  
-    ## Contributing
-  
-    ${contributors}
-  
-    ![GitHub avator](${avatar})
-    ![GitHub followers](https://img.shields.io/github/followers/${login}?label=Follow&style=social)`;
+# ${user.title}
+
+## Description
+
+${user.description}
+
+## Table of Contents
+
+*[Installation](#installation)
+*[Usage](#usage)
+*[Contributing](#contributing)
+
+## Installation
+
+${user.installation}
+
+## Usage
+
+${user.usage}
+
+## Contributing
+
+${user.contributors}
+
+## License
+
+## Questions
+
+![GitHub email](${email})
+![GitHub avatar](${avatar})
+![GitHub followers](https://img.shields.io/github/followers/${login}?label=Follow&style=social)`;
 };
 
 promptUserName()
@@ -83,14 +88,15 @@ promptUserName()
 
     axios.get(queryUrl).then(function(response){
         // console.log(response);
+        const email = response.data.email
         const login = response.data.login;
         const avatar = response.data.avatar_url;
 
         promptUserInfo()
         .then(function(data) {
-            const markdown = generateMarkdown(data, login, avatar);
+            const markdown = generateMarkdown(data, email, avatar, login);
             
-            return writeFile("generatedReadMe.md", markdown);
+            return writeFile("README.md", markdown);
 
         }).then( ()=> {
             console.log("Your README has been successfully created.")
