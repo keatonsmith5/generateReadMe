@@ -8,7 +8,7 @@ const axios = require("axios");
 const writeFile = util.promisify(fs.writeFile);
 
 function promptUserName() {
-    inquirer.prompt([
+    return inquirer.prompt([
         {
             type: "input",
             name: "username",
@@ -18,7 +18,7 @@ function promptUserName() {
 };
 
 function promptUserInfo() {
-    inquirer.prompt([
+    return inquirer.prompt([
         {
             type: "input",
             name: "title",
@@ -47,37 +47,59 @@ function promptUserInfo() {
     ]);
 };
 
-function generateMarkdown({title, description, installation, usage, contributors})
+function generateMarkdown({title, description, installation, usage, contributors}, login, avatar) {
+    return `
+    # ${title}
+  
+    ## Description
+  
+    ${description}
+  
+    ## Table of Contents
+  
+    *[Installation](#installation)
+    *[Usage](#usage)
+    *[Contributing](#contributing)
+  
+    ## Installation
+  
+    ${installation}
+  
+    ## Usage
+  
+    ${usage}
+  
+    ## Contributing
+  
+    ${contributors}
+  
+    ![GitHub avator](${avatar})
+    ![GitHub followers](https://img.shields.io/github/followers/${login}?label=Follow&style=social)`;
+};
+
+promptUserName()
+.then(function({username}) {
+    const queryUrl = `https://api.github.com/users/${username}`;
+
+    axios.get(queryUrl).then(function(response){
+        // console.log(response);
+        const login = response.data.login;
+        const avatar = response.data.avatar_url;
+
+        promptUserInfo()
+        .then(function(data) {
+            const markdown = generateMarkdown(login, avatar);
+            
+            return writeFile("generatedReadMe.md", markdown);
+
+        }).then( ()=> {
+            console.log("Your README has been successfully created.")
+        }).catch((error) => {
+            console.log("Error: ", error);
+        });
+    });
+}).catch((error) => {
+    console.log("Error: ", error);
+});
 
 
-
-
-// TODO: import api and generateMarkdown modules from ./utils/
-
-// TODO: Add inquirer question objects to questions array. This should
-
-// include all the necessary questions for the user.
-// Example question:
-// {
-//   type: "input",
-//   name: "github",
-//   message: "What is your GitHub username?"
-// }
-
-// const questions = [];
-
-// TODO: Write function to synchronously write data in the
-// current working directory to file named for the fileName parameter.
-// The data parameter is the text to write to the file.
-// function writeToFile(fileName, data) {
-// }
-
-// TODO: Use inquirer to prompt the user for each question in the
-// questions array. Then call api.getUser to fetch the user profile
-// data from GitHub. Finally generate the markdown and use writeToFile
-// to create the README.md file.
-// function init() {
-
-// }
-
-// init();
