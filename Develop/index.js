@@ -88,7 +88,7 @@ promptUserName()
 
         promptUserInfo()
         .then(function(data) {
-            const markdown = generateMarkdown(login, avatar);
+            const markdown = generateMarkdown(data, login, avatar);
             
             return writeFile("generatedReadMe.md", markdown);
 
